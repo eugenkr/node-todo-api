@@ -1,31 +1,27 @@
-const mongoose = require('mongoose');
+const express = require('express');
+const bodyParser = require('body-parser');
 
-mongoose.Promise = global.Promise;
+let { mongoose } = require('./db/mongoose');
+let { Todo } = require('./models/todo');
+let { User } = require('./models/user');
 
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+let app = express();
 
-let Todo = mongoose.model('Todo', {
-  text: {
-    type: String
-  },
-  completed: {
-    type: Boolean
-  },
-  completedAt: {
-    type: Number
-  }
+app.use(bodyParser.json());
+
+app.post('/todos', (req, res) => {
+  let todo = new Todo({
+    text: req.body.text
+  });
+
+  todo.save().then(
+    (doc) => res.send(doc),
+    (error) => res.status(400).send(error)
+  );
 });
 
-let newTodo = new Todo({
-  text: 'Buy iWatch',
-  completed: false
-});
+// app.get('/todos', (req, res) => {});
 
-newTodo.save().then(
-  (doc) => {
-    console.log('Saved todo', doc);    
-  },
-  (error) => {
-    console.log('Unable to save todo')
-  }
-);
+app.listen(3000, () => {
+  console.log('Started on port 3000...');
+});
